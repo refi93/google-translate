@@ -11,15 +11,7 @@ class GoogleTranslateProvider extends ServiceProvider
      */
     public function boot()
     {
-        $configPath = __DIR__ . '/../config/google-translate.php';
-
-        if (function_exists('config_path')) {
-            $publishPath = config_path('google-translate.php');
-        } else {
-            $publishPath = base_path('config/google-translate.php');
-        }
-
-        $this->publishes([$configPath => $publishPath], 'config');
+        $this->package('ddctd143/google-translate', 'google-translate', __DIR__ .'/..');
     }
 
     /**

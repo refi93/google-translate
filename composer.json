@@ -19,7 +19,7 @@
     },
     "autoload": {
       "psr-4": {
-        "Dedicated\\GoogleTranslate\\": "src/"
+        "Dedicated\\GoogleTranslate\\": "src/GoogleTranslate/"
       }
     },
     "autoload-dev": {

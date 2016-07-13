@@ -1,6 +1,7 @@
 <?php namespace Dedicated\GoogleTranslate;
 
 use GuzzleHttp\Client;
+use Config;
 
 /**
  * Class Translator
@@ -171,10 +172,11 @@ class Translator
      */
     public function __construct()
     {
+        print_r(Config::get('google-translate'));
         $this->setHttpClient()
-            ->setApiKey(config('google-translate.api_key'))
-            ->setTranslateUrl(config('google-translate.translate_url'))
-            ->setDetectUrl(config('google-translate.detect_url'));
+            ->setApiKey($config->get('google-translate::api_key'))
+            ->setTranslateUrl($config->get('google-translate::translate_url'))
+            ->setDetectUrl($config->get('google-translate::detect_url'));
     }
 
     /**
