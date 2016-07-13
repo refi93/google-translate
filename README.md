@@ -1,4 +1,4 @@
-Laravel package for Google Translate REST API
+Laravel package for Google Translate REST API (Laravel 4)
 ====================
 
 [![GitHub release](https://img.shields.io/github/release/ddctd143/google-translate.svg)](https://packagist.org/packages/ddctd143/google-translate#1.0.0) [![Downloads Total](https://img.shields.io/packagist/dt/ddctd143/google-translate.svg)](https://packagist.org/packages/ddctd143/google-translate)
