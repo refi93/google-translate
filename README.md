@@ -7,18 +7,18 @@ Package allows to work with [Google Translate API](https://cloud.google.com/tran
 
 ## Installation
 
-Package can be installed using composer by adding to "require" object
+Package can be installed using composer by adding to "repositories" and "require" object
 
 ```
+"repositories": [        
+	{
+            "type": "vcs",
+            "url": "https://github.com/refi93/google-translate"
+        }
+],
 "require": {
-    "ddctd143/google-translate": "dev-master"
+    "ddctd143/google-translate": "dev-laravel4compatibilityfix"
 }
-```
-
-or from console:
-
-```
-composer require ddctd143/google-translate dev-master
 ```
 
 
@@ -28,11 +28,11 @@ You should publish config file to be able to add your Google API key.
 To publish config you should do:
 
 ```
-php artisan vendor:publish \
---provider="Dedicated\GoogleTranslate\GoogleTranslateProvider" --tag=config
+php artisan config:publish ddctd143/google-translate
+
 ```
 
-After config is published, you will have it in `config\google-translate.php` of your Laravel project directory
+After config is published, you will have it in `app\config\packages\ddctd143\google-translate\config.php` of your Laravel project directory
 
 
 You should change only one line:
