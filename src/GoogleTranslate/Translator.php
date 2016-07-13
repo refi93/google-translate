@@ -2,6 +2,7 @@
 
 use GuzzleHttp\Client;
 use Config;
+use App;
 
 /**
  * Class Translator
@@ -172,7 +173,8 @@ class Translator
      */
     public function __construct()
     {
-        print_r(Config::get('google-translate'));
+        $config = App::make('config');
+
         $this->setHttpClient()
             ->setApiKey($config->get('google-translate::api_key'))
             ->setTranslateUrl($config->get('google-translate::translate_url'))
