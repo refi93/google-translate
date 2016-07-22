@@ -47,6 +47,11 @@ class Translator
     protected $detectUrl;
 
     /**
+     * @var cache to minimise the amount of google translate requests
+     */
+    private static $translator_cache = [];
+
+    /**
      * @return Client
      */
     public function getHttpClient()
@@ -179,6 +184,11 @@ class Translator
             ->setApiKey($config->get('google-translate::api_key'))
             ->setTranslateUrl($config->get('google-translate::translate_url'))
             ->setDetectUrl($config->get('google-translate::detect_url'));
+    
+        if (!self::$translator_cache)
+        {
+          self::initCache();
+        }
     }
 
     /**
@@ -204,15 +214,23 @@ class Translator
             }
         }
 
-        $requestUrl = $this->buildRequestUrl($this->getTranslateUrl(), [
-            'q' => $text,
-            'source' => $this->getSourceLang(),
-            'target' => $this->getTargetLang()
-        ]);
+        if ($this->checkCache($this->getSourceLang(), $this->getTargetLang(), $text))
+        {
+          $response = $this->getCache($this->getSourceLang(), $this->getTargetLang(), $text);
+        }
+        else
+        {
+          $requestUrl = $this->buildRequestUrl($this->getTranslateUrl(), [
+              'q' => $text,
+              'source' => $this->getSourceLang(),
+              'target' => $this->getTargetLang()
+          ]);
 
-        $response = $this->getResponse($requestUrl);
+          $response = $this->getResponse($requestUrl);
+        }
 
         if (isset($response['data']['translations']) && count($response['data']['translations']) > 0) {
+            $this->setCache($this->getSourceLang(), $this->getTargetLang(), $text, $response);
             return $response['data']['translations'][0]['translatedText'];
         }
         return null;
@@ -261,5 +279,71 @@ class Translator
     {
         $response = $this->getHttpClient()->get($requestUrl);
         return json_decode($response->getBody()->getContents(), true);
+    }
+
+    public static function checkCache($source_lang, $target_lang, $data)
+    {
+      $cache = self::$translator_cache;
+      return array_key_exists($source_lang, $cache) && array_key_exists($target_lang, $cache[$source_lang]) && array_key_exists($data, $cache[$source_lang][$target_lang]);
+    }
+
+    public static function getCache($source_lang, $target_lang, $data)
+    {
+      if (!self::checkCache($source_lang, $target_lang, $data))
+      {
+        return null;
+      }
+
+      return self::$translator_cache[$source_lang][$target_lang][$data];
+    }
+
+    public static function setCache($source_lang, $target_lang, $data, $response)
+    { 
+      $cache = &self::$translator_cache;
+      if (!array_key_exists($source_lang, $cache))
+      {
+        $cache[$source_lang] = [];
+      }
+      if (!array_key_exists($target_lang, $cache[$source_lang]))
+      {
+        $cache[$source_lang][$target_lang] = [];
+      }
+      
+      $cache[$source_lang][$target_lang][$data] = $response;
+
+      return true;
+    }
+
+    private static function initCache()
+    {
+      if (!file_exists(self::getCacheFile()))
+      {
+        self::$translator_cache = [];
+      }
+      else
+      {
+        self::$translator_cache = json_decode(file_get_contents(self::getCacheFile()), true);
+      } 
+    }
+
+    public static function storeCache()
+    {
+      if (!is_dir(self::getStorageFolder())) {
+        mkdir(self::getStorageFolder(), 0775, true);
+      }
+
+      file_put_contents(self::getCacheFile(), json_encode(self::$translator_cache, JSON_PRETTY_PRINT));
+
+      return true;
+    }
+
+    private static function getStorageFolder()
+    {
+      return storage_path('vendor/ddctd143/google-translate');
+    }
+
+    public static function getCacheFile()
+    {
+      return self::getStorageFolder().'/translator_cache.JSON';
     }
 }
