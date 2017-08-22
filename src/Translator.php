@@ -200,13 +200,11 @@ class Translator
             }
         }
 
-        $requestUrl = $this->buildRequestUrl($this->getTranslateUrl(), [
+        $response = $this->getResponse($this->getTranslateUrl(), [
             'q' => $text,
             'source' => $this->getSourceLang(),
             'target' => $this->getTargetLang()
         ]);
-
-        $response = $this->getResponse($requestUrl);
 
         if (isset($response['data']['translations']) && count($response['data']['translations']) > 0) {
             return $response['data']['translations'][0]['translatedText'];
@@ -223,11 +221,9 @@ class Translator
      */
     public function detect($text)
     {
-        $requestUrl = $this->buildRequestUrl($this->getDetectUrl(), [
+        $response = $this->getResponse($this->getDetectUrl(), [
             'q' => $text
         ]);
-
-        $response = $this->getResponse($requestUrl);
 
         if (isset($response['data']['detections'])) {
             return $response['data']['detections'][0][0]['language'];
@@ -236,26 +232,16 @@ class Translator
     }
 
     /**
-     * Builds full request url with query parameters
-     *
-     * @param $url
-     * @param array $queryParams
-     * @return string
-     */
-    protected function buildRequestUrl($url, $queryParams = [])
-    {
-        $query = http_build_query($queryParams);
-        return $url . '&' . $query;
-    }
-
-    /**
      * Sends request to provided request url and gets json array
      * @param $requestUrl
+     * @param array $requestBody
      * @return mixed
      */
-    protected function getResponse($requestUrl)
+    protected function getResponse($requestUrl, $requestBody)
     {
-        $response = $this->getHttpClient()->get($requestUrl);
+        $response = $this->getHttpClient()->post($requestUrl, [
+            'json' => $requestBody
+        ]);
         return json_decode($response->getBody()->getContents(), true);
     }
 }
